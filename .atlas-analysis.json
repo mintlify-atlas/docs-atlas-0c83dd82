@@ -1,0 +1,62 @@
+{
+  "projectType": "ai-ml",
+  "projectName": "AI Math Notes",
+  "projectDescription": "An interactive drawing application that uses multimodal AI to calculate and display results for handwritten mathematical equations.",
+  "theme": "mint",
+  "primaryColor": "#FF9500",
+  "lightColor": "#FFA726",
+  "darkColor": "#F57C00",
+  "navigation": {
+    "groups": [
+      {
+        "group": "Get Started",
+        "pages": [
+          "introduction",
+          "installation",
+          "quickstart"
+        ]
+      },
+      {
+        "group": "User Guide",
+        "pages": [
+          "guide/interface",
+          "guide/drawing-equations",
+          "guide/keyboard-shortcuts"
+        ]
+      },
+      {
+        "group": "Development",
+        "pages": [
+          "development/architecture",
+          "development/api-integration",
+          "development/contributing"
+        ]
+      },
+      {
+        "group": "Resources",
+        "pages": [
+          "troubleshooting",
+          "faq",
+          "license"
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Interactive canvas for drawing mathematical equations",
+    "GPT-4o vision integration for equation recognition",
+    "Real-time calculation and answer display",
+    "Undo functionality for drawing actions",
+    "Keyboard shortcuts for productivity"
+  ],
+  "publicApiSurface": [
+    "DrawingApp class",
+    "start_draw() method",
+    "paint() method",
+    "calculate() method",
+    "undo() method",
+    "clear() method",
+    "draw_answer() method",
+    "encode_image_to_base64() function"
+  ]
+}
