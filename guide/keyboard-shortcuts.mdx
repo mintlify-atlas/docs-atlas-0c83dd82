@@ -1,0 +1,183 @@
+---
+title: 'Keyboard Shortcuts'
+description: 'Master the keyboard shortcuts in AI Math Notes for faster workflow'
+---
+
+AI Math Notes includes keyboard shortcuts to help you work more efficiently without reaching for the mouse buttons.
+
+## Available Shortcuts
+
+<Tabs>
+  <Tab title="Undo">
+    ### Undo Last Stroke
+
+    **Shortcut**: `Cmd + Z` (macOS) or `Ctrl + Z` (Windows/Linux)
+
+    Removes the last drawing stroke from the canvas.
+
+    ```python
+    self.root.bind("<Command-z>", self.command_undo)
+    ```
+
+    <Info>
+    The undo shortcut is bound to the `<Command-z>` event in Tkinter, which automatically maps to Cmd on macOS and Ctrl on other platforms.
+    </Info>
+
+    #### How It Works
+
+    When you press the undo shortcut:
+
+    1. The application retrieves the last action from the actions list
+    2. Each line in that action is deleted from the canvas
+    3. The entire canvas is redrawn from the remaining actions
+
+    ```python
+    def command_undo(self, event):
+        self.undo()
+
+    def undo(self):
+        if self.actions:
+            last_action = self.actions.pop()
+            for line_id, coords in last_action:
+                self.canvas.delete(line_id)
+            self.redraw_all()
+    ```
+
+    <Tip>
+    Each stroke (from mouse down to mouse up) counts as one action. You can undo multiple strokes by pressing the shortcut repeatedly.
+    </Tip>
+  </Tab>
+
+  <Tab title="Calculate">
+    ### Calculate Equation
+
+    **Shortcut**: `Return` (macOS) or `Enter` (Windows/Linux)
+
+    Sends your drawing to the AI model for calculation.
+
+    ```python
+    self.root.bind("<Return>", self.command_calculate)
+    ```
+
+    <Note>
+    The Return/Enter key provides quick access to calculation without needing to click the Calculate button.
+    </Note>
+
+    #### How It Works
+
+    When you press Return/Enter:
+
+    1. The canvas is converted to a PIL image
+    2. The image is encoded to base64 format
+    3. A request is sent to OpenAI's GPT-4o model
+    4. The response is rendered next to your equals sign
+
+    ```python
+    def command_calculate(self, event):
+        self.calculate()
+
+    def calculate(self):
+        def encode_image_to_base64(image):
+            buffered = BytesIO()
+            image.save(buffered, format="PNG")
+            return base64.b64encode(buffered.getvalue()).decode('utf-8')
+            
+        base64_image = encode_image_to_base64(self.image)
+        # Send to OpenAI API...
+    ```
+
+    <Tip>
+    Make sure the equals sign is the last thing you drew before pressing Return/Enter for accurate answer placement.
+    </Tip>
+  </Tab>
+</Tabs>
+
+## Keyboard Bindings Reference
+
+Here's a quick reference table of all keyboard shortcuts:
+
+| Action | macOS | Windows/Linux | Function |
+|--------|-------|---------------|----------|
+| Undo | `Cmd + Z` | `Ctrl + Z` | Remove last stroke |
+| Calculate | `Return` | `Enter` | Solve the equation |
+
+## Event Binding in Code
+
+The shortcuts are implemented using Tkinter's event binding system:
+
+```python
+class DrawingApp:
+    def __init__(self, root):
+        # ... other initialization code ...
+        
+        # Keyboard shortcuts
+        self.root.bind("<Command-z>", self.command_undo)
+        self.root.bind("<Return>", self.command_calculate)
+```
+
+<Info>
+Tkinter's `<Command-z>` binding automatically handles platform differences:
+- On macOS: Maps to Command (⌘) key
+- On Windows/Linux: Maps to Control (Ctrl) key
+</Info>
+
+## Mouse Bindings
+
+In addition to keyboard shortcuts, the application uses mouse event bindings for drawing:
+
+```python
+self.canvas.bind("<Button-1>", self.start_draw)        # Left click
+self.canvas.bind("<B1-Motion>", self.paint)            # Drag with left button
+self.canvas.bind("<ButtonRelease-1>", self.reset)      # Release left button
+```
+
+<Tabs>
+  <Tab title="Start Draw">
+    **Event**: `<Button-1>` (Left mouse button click)
+
+    Initiates a new drawing stroke and creates a new action.
+
+    ```python
+    def start_draw(self, event):
+        self.current_action = []
+        self.last_x, self.last_y = event.x, event.y
+    ```
+  </Tab>
+
+  <Tab title="Paint">
+    **Event**: `<B1-Motion>` (Left button drag)
+
+    Continuously draws lines as you move the mouse.
+
+    ```python
+    def paint(self, event):
+        x, y = event.x, event.y
+        if self.last_x and self.last_y:
+            line_id = self.canvas.create_line((self.last_x, self.last_y, x, y), 
+                                             fill='white', width=5)
+            self.current_action.append((line_id, (self.last_x, self.last_y, x, y)))
+        self.last_x, self.last_y = x, y
+    ```
+  </Tab>
+
+  <Tab title="Reset">
+    **Event**: `<ButtonRelease-1>` (Release left button)
+
+    Completes the current stroke and saves it as an action.
+
+    ```python
+    def reset(self, event):
+        self.last_x, self.last_y = None, None
+        if self.current_action:
+            self.actions.append(self.current_action)
+    ```
+  </Tab>
+</Tabs>
+
+## No Clear Shortcut
+
+<Note>
+There is currently no keyboard shortcut for the Clear function. You must click the Clear button to reset the entire canvas.
+</Note>
+
+If you want to remove just the last few strokes, use `Cmd/Ctrl + Z` repeatedly instead of clearing everything.

@@ -1,0 +1,243 @@
+---
+title: 'API Integration'
+description: 'Understand GPT-4o vision integration, prompt engineering, and API call structure'
+---
+
+## Overview
+
+AI Math Notes uses OpenAI's GPT-4o vision model to analyze hand-drawn mathematical equations and return calculated results. The integration involves base64 image encoding, structured prompts, and response parsing.
+
+## OpenAI Client Setup
+
+The OpenAI client is initialized in the `DrawingApp` constructor (`main.py:43`):
+
+```python
+self.client = OpenAI()
+```
+
+This assumes the `OPENAI_API_KEY` environment variable is set (as per README setup instructions).
+
+## Image Encoding
+
+Before sending the drawn equation to the API, the PIL Image must be converted to base64-encoded PNG.
+
+### encode_image_to_base64()
+
+This helper function (`main.py:88-91`) handles the conversion:
+
+<ParamField path="image" type="PIL.Image">
+  The PIL Image object containing the drawn equation
+</ParamField>
+
+<ParamField returns="str">
+  Base64-encoded PNG image string
+</ParamField>
+
+```python
+def encode_image_to_base64(image):
+    buffered = BytesIO()
+    image.save(buffered, format="PNG")
+    return base64.b64encode(buffered.getvalue()).decode('utf-8')
+```
+
+**Process:**
+1. Create an in-memory BytesIO buffer
+2. Save the PIL Image to the buffer in PNG format
+3. Encode the buffer contents to base64
+4. Decode bytes to UTF-8 string for API transmission
+
+## API Call Structure
+
+The `calculate()` method (`main.py:87-113`) orchestrates the API request:
+
+```python
+def calculate(self):
+    base64_image = encode_image_to_base64(self.image)
+
+    response = self.client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": "Give the answer to this math equation. Only respond with the answer. Only respond with numbers. NEVER Words. Only answer unanswered expressions. Look for equal sign with nothing on the right of it. If it has an answer already. DO NOT ANSWER it."},
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": f"data:image/png;base64,{base64_image}"},
+                    },
+                ],
+            }
+        ],
+        max_tokens=300,
+    )
+
+    answer = response.choices[0].message.content
+    self.draw_answer(answer)
+```
+
+### API Parameters
+
+<ParamField path="model" type="string" default="gpt-4o">
+  The GPT-4o vision model capable of analyzing images
+</ParamField>
+
+<ParamField path="messages" type="array">
+  Array containing a single user message with multimodal content (text + image)
+</ParamField>
+
+<ParamField path="max_tokens" type="integer" default="300">
+  Maximum tokens for the response (answers are typically short numbers)
+</ParamField>
+
+## Prompt Engineering
+
+The prompt (`main.py:101`) is carefully designed to constrain the model's output:
+
+```
+Give the answer to this math equation. 
+Only respond with the answer. 
+Only respond with numbers. 
+NEVER Words. 
+Only answer unanswered expressions. 
+Look for equal sign with nothing on the right of it. 
+If it has an answer already. DO NOT ANSWER it.
+```
+
+### Prompt Strategy
+
+1. **Output Format**: "Only respond with numbers. NEVER Words" ensures numeric-only responses
+2. **Task Clarity**: "Give the answer to this math equation" defines the objective
+3. **Conditional Logic**: Only solve equations with incomplete equals signs (e.g., `5 + 3 =` not `5 + 3 = 8`)
+4. **Brevity**: "Only respond with the answer" prevents explanations
+
+This design allows the model to distinguish between:
+- `5 + 3 =` (needs solving) → Returns `8`
+- `5 + 3 = 8` (already solved) → Returns nothing
+
+## Multimodal Content Structure
+
+The API accepts multimodal input via the content array:
+
+```python
+"content": [
+    {"type": "text", "text": "<prompt>"},
+    {
+        "type": "image_url",
+        "image_url": {"url": f"data:image/png;base64,{base64_image}"},
+    },
+]
+```
+
+### Image URL Format
+
+The base64 image is embedded using a data URI:
+
+```
+data:image/png;base64,<base64_encoded_image>
+```
+
+This format allows the image to be sent inline without external hosting.
+
+## Response Parsing
+
+The API response is parsed to extract the answer (`main.py:112`):
+
+```python
+answer = response.choices[0].message.content
+```
+
+The response object structure:
+
+```python
+{
+    "choices": [
+        {
+            "message": {
+                "content": "8"  # The calculated answer
+            }
+        }
+    ]
+}
+```
+
+Since the prompt constrains output to numbers only, `content` contains the numeric result as a string.
+
+## Integration Flow
+
+1. **User Action**: User draws equation and presses Enter/Return (`main.py:26`)
+2. **Event Trigger**: `command_calculate()` calls `calculate()` (`main.py:116-117`)
+3. **Image Encoding**: PIL Image converted to base64 PNG
+4. **API Request**: Multimodal request sent to GPT-4o with prompt + image
+5. **Response**: Model returns numeric answer
+6. **Display**: Answer rendered on canvas via `draw_answer()` (`main.py:113`)
+
+## Error Handling
+
+The current implementation (`main.py:87-113`) does not include explicit error handling. Potential failure points:
+
+- Network connectivity issues
+- API authentication errors
+- Rate limiting
+- Invalid responses from the model
+
+Future improvements could add try-except blocks around the API call.
+
+## API Requirements
+
+### Environment Setup
+
+From the README:
+
+```bash
+# Setup OpenAI API as environment variable
+export OPENAI_API_KEY="your-api-key-here"
+```
+
+### Dependencies
+
+From `requirements.txt`:
+
+```
+openai==1.14.2
+```
+
+The OpenAI Python client handles authentication, retries, and request formatting.
+
+## Performance Considerations
+
+- **Image Size**: 1200x800 canvas results in ~50-100KB base64 strings
+- **Latency**: API calls typically complete in 1-3 seconds
+- **Token Usage**: Responses use less than 10 tokens (just the numeric answer)
+- **Cost**: GPT-4o vision pricing applies per API call
+
+## Example Request/Response
+
+### Request
+
+```python
+{
+    "model": "gpt-4o",
+    "messages": [
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "Give the answer to this math equation..."},
+                {"type": "image_url", "image_url": {"url": "data:image/png;base64,iVBORw0KG..."}}
+            ]
+        }
+    ],
+    "max_tokens": 300
+}
+```
+
+### Response
+
+```python
+{
+    "choices": [
+        {"message": {"content": "8"}}
+    ]
+}
+```
+
+For a drawn equation `5 + 3 =`, the model returns `"8"`.

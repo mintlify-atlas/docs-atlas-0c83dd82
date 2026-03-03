@@ -1,80 +1,216 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quick Start
+description: Draw and calculate your first equation with AI Math Notes in under 60 seconds
 ---
 
-## Get started in three steps
+# Quick Start Tutorial
 
-Get your documentation site running locally and make your first customization.
+This tutorial will walk you through creating and solving your first handwritten equation using AI Math Notes. You'll learn the basics of the interface and see the AI in action.
 
-### Step 1: Set up your local environment
+## Launch the Application
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
+<Steps>
+  <Step title="Start AI Math Notes">
+    Open your terminal, navigate to the AI Math Notes directory, and run:
     
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
+    ```bash
+    python main.py
+    ```
     
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+    A window will appear with:
+    - A **black canvas** (1200x800 pixels) for drawing
+    - Three buttons at the bottom: **Clear**, **Undo (Cmd/Ctrl Z)**, and **Calculate (Return/Enter)**
+  </Step>
 
-### Step 2: Deploy your changes
-
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
+  <Step title="Draw Your First Equation">
+    Using your mouse, draw a simple equation on the canvas. Let's start with something easy:
     
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+    ```
+    5 + 3 =
+    ```
+    
+    <Tip>
+      Draw clearly and make sure the equals sign (`=`) is the **last thing you draw**. This is important - the AI uses the position of the equals sign to know where to place the answer.
+    </Tip>
+    
+    Your drawing will appear in white on the black canvas. Don't worry if your handwriting isn't perfect - GPT-4o is quite good at recognizing handwritten math.
+  </Step>
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+  <Step title="Calculate the Result">
+    Press the **Enter** key (or click the **Calculate** button).
+    
+    The application will:
+    1. Capture your canvas as an image
+    2. Convert it to base64 encoding
+    3. Send it to OpenAI's GPT-4o model
+    4. Receive the calculated answer
+    5. Display the result in **orange text** next to your equals sign
+    
+    You should see `8` appear in orange to the right of your equals sign!
+  </Step>
+</Steps>
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+## Understanding the Interface
 
-### Step 3: Go live
+Now that you've solved your first equation, let's explore the features available to you:
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+### Drawing on the Canvas
 
-## Next steps
+The canvas responds to mouse events:
 
-Now that you have your docs running, explore these key features:
-
-<CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
-</CardGroup>
+- **Click and drag** to draw lines in white
+- Lines are **5 pixels wide** for clear visibility
+- Each stroke you make is tracked as a separate action (important for undo)
 
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+  The canvas uses Tkinter for the UI and PIL (Pillow) for image processing. Every line you draw is stored both as a canvas element and in an underlying PIL image.
 </Note>
+
+### Control Buttons
+
+<CardGroup cols={3}>
+  <Card title="Clear" icon="eraser">
+    Removes everything from the canvas and resets the image. Use this to start completely fresh.
+  </Card>
+  <Card title="Undo" icon="rotate-left">
+    Removes the last stroke you drew. You can also use **Cmd+Z** (macOS) or **Ctrl+Z** (Windows/Linux).
+  </Card>
+  <Card title="Calculate" icon="calculator">
+    Sends your drawing to GPT-4o for calculation. You can also press **Enter** or **Return**.
+  </Card>
+</CardGroup>
+
+### How the AI Works
+
+When you click Calculate, here's what happens under the hood:
+
+```python
+def calculate(self):
+    # Encode the canvas image to base64
+    base64_image = encode_image_to_base64(self.image)
+
+    # Send to GPT-4o with specific instructions
+    response = self.client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": "Give the answer to this math equation. Only respond with the answer. Only respond with numbers. NEVER Words. Only answer unanswered expressions. Look for equal sign with nothing on the right of it. If it has an answer already. DO NOT ANSWER it."},
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": f"data:image/png;base64,{base64_image}"},
+                    },
+                ],
+            }
+        ],
+        max_tokens=300,
+    )
+
+    answer = response.choices[0].message.content
+    self.draw_answer(answer)
+```
+
+The AI is instructed to:
+- Look for equals signs with nothing to the right
+- Only respond with numbers (no words)
+- Calculate the answer to the equation
+
+## Try More Complex Equations
+
+Now that you understand the basics, try some more challenging equations:
+
+<Steps>
+  <Step title="Multiplication and Division">
+    Draw and calculate:
+    ```
+    12 × 7 =
+    ```
+    or
+    ```
+    144 ÷ 12 =
+    ```
+    
+    <Tip>
+      GPT-4o recognizes various mathematical symbols. You can use `×`, `*`, `÷`, `/`, `+`, `-`, and more.
+    </Tip>
+  </Step>
+
+  <Step title="Multi-Operation Expressions">
+    Try an equation with multiple operations:
+    ```
+    15 + 3 × 4 =
+    ```
+    
+    The AI should respect the order of operations (PEMDAS/BODMAS) and return `27`.
+  </Step>
+
+  <Step title="Using Undo">
+    If you make a mistake while drawing:
+    1. Press **Cmd/Ctrl+Z** to undo the last stroke
+    2. You can undo multiple times to remove several strokes
+    3. Each stroke (from mouse press to release) is one undo action
+  </Step>
+
+  <Step title="Multiple Equations">
+    You can solve multiple equations on the same canvas:
+    1. Draw your first equation (e.g., `2 + 2 =`)
+    2. Press Enter to calculate
+    3. Draw another equation elsewhere on the canvas (e.g., `10 - 3 =`)
+    4. Press Enter again
+    
+    <Warning>
+      Remember: the equals sign must be the **last thing you draw** before calculating. If you draw anything after the equals sign, the AI may not know where to place the answer.
+    </Warning>
+  </Step>
+</Steps>
+
+## Tips for Best Results
+
+### Write Clearly
+While GPT-4o is excellent at handwriting recognition, clearer writing produces more accurate results. Take your time drawing numbers and symbols.
+
+### Proper Spacing
+Leave some space between numbers and operators. This helps the AI distinguish between elements like `11` and `1 1`.
+
+### Equals Sign Placement
+The application finds the position of your equals sign by looking at the last stroke you made. Make sure to:
+1. Draw your equation
+2. Draw the equals sign **last**
+3. Immediately press Enter (don't draw anything else)
+
+### Answer Positioning
+Answers appear at coordinates calculated from your equals sign position:
+
+```python
+# From main.py:119-132
+def draw_answer(self, answer):
+    last_action = self.actions[-1]
+    last_coords = last_action[-1][-1]
+
+    equals_x = last_coords[2]
+    equals_y = last_coords[3]
+
+    # Position answer 70 pixels to the right, 20 pixels up
+    x_start = equals_x + 70
+    y_start = equals_y - 20
+
+    # Draw in orange (#FF9500)
+    self.canvas.create_text(x_start, y_start, text=answer, 
+                           font=self.custom_font, fill="#FF9500")
+```
+
+The answer appears 70 pixels to the right and slightly above the end of your equals sign.
+
+## What's Next?
+
+You now know how to:
+- ✓ Draw equations on the canvas
+- ✓ Use the Calculate, Undo, and Clear functions
+- ✓ Get AI-powered answers to your handwritten math
+
+Experiment with different types of equations and see what the AI can solve. The application works with arithmetic, fractions, exponents, and more!
+
+<Tip>
+  Want to contribute to the project? Check out the [GitHub repository](https://github.com/ayushpai/AI-Math-Notes) and the list of future improvements. Auto-detecting equals signs (so they don't have to be drawn last) is a great first contribution!
+</Tip>

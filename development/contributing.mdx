@@ -1,0 +1,185 @@
+---
+title: 'Contributing'
+description: 'Learn how to contribute to AI Math Notes development'
+---
+
+## Overview
+
+Contributions to AI Math Notes are welcome! This project is open source under the MIT License and accepts improvements, bug fixes, and feature additions.
+
+## Getting Started
+
+### Prerequisites
+
+- Python 3.x
+- OpenAI API key
+- Basic understanding of Tkinter and PIL
+
+### Setup Development Environment
+
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Set up your OpenAI API key as an environment variable:
+   ```bash
+   export OPENAI_API_KEY="your-api-key-here"
+   ```
+4. Run the application:
+   ```bash
+   python main.py
+   ```
+
+## Project Structure
+
+The project follows a simple structure:
+
+```
+.
+├── main.py              # Core DrawingApp class and application logic
+├── requirements.txt     # Python dependencies (pillow, openai)
+├── README.md           # User-facing documentation
+└── LICENSE             # MIT License
+```
+
+All application logic resides in `main.py:8-143` within the `DrawingApp` class.
+
+## Future Improvements
+
+From the README, the following improvements are planned:
+
+### Auto-detect Equals Sign
+
+**Current Limitation**: The equals sign must be the last thing drawn before clicking Calculate. The answer is positioned based on the coordinates of the last drawing action (`main.py:124-128`).
+
+```python
+last_action = self.actions[-1]
+last_coords = last_action[-1][-1]
+
+equals_x = last_coords[2]
+equals_y = last_coords[3]
+```
+
+**Proposed Solution**: Implement a computer vision model to:
+- Detect equals signs anywhere on the canvas
+- Identify which equations are unanswered (no value on the right side)
+- Position answers correctly regardless of drawing order
+
+**Implementation Ideas**:
+- Use OCR/symbol detection on the PIL Image
+- Train a custom model to recognize mathematical symbols
+- Integrate OpenCV for contour detection and symbol classification
+- Modify `draw_answer()` to accept detected equals sign coordinates
+
+### Other Contribution Ideas
+
+1. **Error Handling**: Add try-except blocks around API calls (`main.py:95-110`)
+2. **Loading Indicators**: Show visual feedback during API processing
+3. **Multiple Equations**: Support solving multiple equations in one session
+4. **Export Functionality**: Save canvas as image file
+5. **Configuration**: Make canvas size, colors, and fonts customizable
+6. **Response Validation**: Verify API responses are valid numbers
+7. **Offline Mode**: Cache common calculations
+8. **Handwriting Recognition**: Improve accuracy with preprocessing
+
+## Contribution Guidelines
+
+### Code Style
+
+- Follow PEP 8 Python style guidelines
+- Maintain the existing class structure
+- Add comments for complex logic
+- Keep methods focused and single-purpose
+
+### Testing Your Changes
+
+Before submitting:
+
+1. Test basic drawing functionality
+2. Verify undo/clear operations work correctly
+3. Test calculation with various equations:
+   - Simple arithmetic: `5 + 3 =`
+   - Multiple operations: `10 * 2 + 5 =`
+   - Edge cases: `0 / 0 =`
+4. Ensure both keyboard shortcuts work (Cmd/Ctrl+Z, Enter/Return)
+
+### Submitting Changes
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request with:
+   - Clear description of changes
+   - Why the change is needed
+   - Any testing performed
+
+## Key Areas for Contribution
+
+### 1. Drawing Engine (`main.py:45-60`)
+
+Improve the drawing system:
+- Add brush size controls
+- Support different colors
+- Implement eraser functionality
+- Add shape drawing tools
+
+### 2. API Integration (`main.py:87-113`)
+
+Enhance GPT-4o integration:
+- Add error handling and retries
+- Implement response validation
+- Support alternative models
+- Add rate limiting
+
+### 3. User Interface
+
+Expand the UI capabilities:
+- Add menu bar with File/Edit/Help
+- Create settings dialog
+- Improve button layout
+- Add status bar for feedback
+
+### 4. Action Management (`main.py:68-85`)
+
+Improve undo/redo:
+- Implement redo functionality
+- Add action history limit
+- Support selective undo (undo specific strokes)
+
+## License
+
+This project is licensed under the MIT License:
+
+```
+MIT License
+
+Copyright (c) 2024 Ayush Pai
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPORIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+```
+
+By contributing, you agree to license your contributions under the same MIT License.
+
+## Getting Help
+
+The project was inspired by Apple's ["Math Notes" demo](https://www.youtube.com/live/RXeOiIDNNek?si=zsfLkfVtCoCqk1ie&t=2806) from WWDC 2024.
+
+For questions or discussions about contributions, please open an issue on the repository.
+
+## Recognition
+
+All contributions are welcome and appreciated! Contributors will be recognized in future README updates.

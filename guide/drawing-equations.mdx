@@ -1,0 +1,148 @@
+---
+title: 'Drawing Equations'
+description: 'Tips and best practices for drawing equations that the AI can recognize and solve'
+---
+
+Drawing equations effectively is key to getting accurate results from AI Math Notes. Follow these guidelines to improve recognition accuracy.
+
+## Basic Drawing Technique
+
+The application uses your mouse movements to create white lines on a black canvas:
+
+<Tabs>
+  <Tab title="Line Properties">
+    Each stroke you draw has these characteristics:
+    - **Width**: 5 pixels
+    - **Color**: White (#FFFFFF)
+    - **Smoothness**: Lines are created continuously as you drag the mouse
+
+    ```python
+    self.canvas.create_line((self.last_x, self.last_y, x, y), fill='white', width=5)
+    ```
+  </Tab>
+
+  <Tab title="Stroke Actions">
+    The application tracks each stroke as a separate action:
+    
+    1. **Start**: Click and hold the left mouse button
+    2. **Draw**: Drag to create the stroke
+    3. **End**: Release the mouse button
+
+    <Info>
+    Each complete stroke becomes one action in the undo history.
+    </Info>
+  </Tab>
+</Tabs>
+
+## The Equals Sign Rule
+
+The most important rule for using AI Math Notes effectively:
+
+<Note>
+**The equals sign must be the last thing you draw** before clicking Calculate.
+</Note>
+
+The AI looks for an equals sign with nothing to the right of it to determine where to place the answer. Here's how it works:
+
+```python
+def draw_answer(self, answer):
+    # Find the position of the last equals sign drawn
+    if not self.actions:
+        return
+    
+    last_action = self.actions[-1]
+    last_coords = last_action[-1][-1]
+    equals_x = last_coords[2]
+    equals_y = last_coords[3]
+    
+    # Set the position to draw the answer
+    x_start = equals_x + 70
+    y_start = equals_y - 20
+```
+
+The answer will be positioned 70 pixels to the right and 20 pixels above the endpoint of your last stroke.
+
+## Best Practices
+
+### Draw Clear Numbers
+
+<Tip>
+Make your numbers and symbols distinct and well-spaced for better recognition by the GPT-4o vision model.
+</Tip>
+
+The AI uses computer vision to interpret your handwriting, so clarity matters:
+
+- Write numbers large enough to be clearly recognized
+- Leave space between different elements of the equation
+- Keep consistent sizing across the equation
+
+### Equation Format
+
+Follow this sequence for best results:
+
+1. Draw the left side of the equation (e.g., `5 + 3`)
+2. Draw the equals sign (`=`) **last**
+3. Leave the right side empty
+4. Click Calculate or press Enter
+
+<Tabs>
+  <Tab title="Correct">
+    ```
+    5 + 3 =
+    ```
+    ✓ Equals sign is last, right side is empty
+  </Tab>
+
+  <Tab title="Incorrect">
+    ```
+    = 5 + 3
+    ```
+    ✗ Equals sign is not last
+    
+    ```
+    5 + 3 = 8
+    ```
+    ✗ Equation already has an answer
+  </Tab>
+</Tabs>
+
+### AI Instructions
+
+The application sends specific instructions to GPT-4o:
+
+```python
+{"type": "text", "text": "Give the answer to this math equation. Only respond with the answer. Only respond with numbers. NEVER Words. Only answer unanswered expressions. Look for equal sign with nothing on the right of it. If it has an answer already. DO NOT ANSWER it."}
+```
+
+<Info>
+The AI is instructed to:
+- Only provide numerical answers
+- Only solve equations with empty right sides
+- Ignore equations that already have answers
+</Info>
+
+## Supported Operations
+
+Since the application uses GPT-4o's vision capabilities, it can recognize:
+
+- Basic arithmetic: `+`, `-`, `×`, `÷`
+- Fractions and mixed numbers
+- Exponents and roots
+- More complex mathematical expressions
+
+<Tip>
+The AI model (GPT-4o) is quite sophisticated and can handle a wide variety of mathematical notation. Don't be afraid to try complex equations!
+</Tip>
+
+## Troubleshooting Recognition
+
+If the AI isn't providing accurate results:
+
+1. **Check your equals sign**: Make sure it was the last thing you drew
+2. **Improve clarity**: Use Undo to redraw unclear symbols
+3. **Use Clear**: Start fresh if the equation is messy
+4. **Space it out**: Give more room between numbers and operators
+
+<Note>
+Remember, you can always use **Cmd/Ctrl Z** to undo the last stroke without clearing the entire canvas.
+</Note>

@@ -1,0 +1,74 @@
+---
+title: Introduction
+description: Transform handwritten equations into instant solutions with AI-powered math recognition
+---
+
+# Welcome to AI Math Notes
+
+AI Math Notes is an interactive drawing application that lets you write mathematical equations by hand and instantly get AI-calculated results. Simply draw your equation, add an equals sign, and watch as GPT-4o recognizes your handwriting and places the answer right where you need it.
+
+Inspired by Apple's "Math Notes" demo from WWDC 2024, this application combines the natural feel of handwriting with the power of multimodal AI.
+
+<CardGroup cols={2}>
+  <Card title="Installation" icon="download" href="/installation">
+    Set up AI Math Notes in minutes with Python and OpenAI API
+  </Card>
+  <Card title="Quick Start" icon="rocket" href="/quickstart">
+    Draw and calculate your first equation in under 60 seconds
+  </Card>
+  <Card title="GitHub Repository" icon="github" href="https://github.com/ayushpai/AI-Math-Notes">
+    Explore the source code and contribute to the project
+  </Card>
+  <Card title="License" icon="scale-balanced" href="https://github.com/ayushpai/AI-Math-Notes/blob/main/LICENSE">
+    Open source under MIT License - free for personal and commercial use
+  </Card>
+</CardGroup>
+
+## Key Features
+
+### Natural Handwriting Input
+Draw equations directly on a digital canvas using your mouse or touchpad. The black canvas with white drawing provides clear contrast for optimal handwriting recognition.
+
+### AI-Powered Calculation
+Powered by OpenAI's GPT-4o multimodal model, the application reads your handwritten equations and calculates results with impressive accuracy. The AI understands mathematical notation and solves expressions ranging from simple arithmetic to complex equations.
+
+### Intelligent Answer Placement
+Results appear automatically next to the equals sign in orange, maintaining the natural flow of your work. The application detects unsolved equations (equals signs with nothing to the right) and places answers precisely where they belong.
+
+### Intuitive Controls
+
+<CardGroup cols={3}>
+  <Card title="Clear" icon="eraser">
+    Reset the entire canvas for a fresh start
+  </Card>
+  <Card title="Undo" icon="rotate-left">
+    Use Cmd/Ctrl+Z to remove your last stroke
+  </Card>
+  <Card title="Calculate" icon="equals">
+    Press Enter or click to solve the equation
+  </Card>
+</CardGroup>
+
+## How It Works
+
+1. **Draw** - Use your mouse to write a mathematical equation on the canvas
+2. **Add Equals** - End your equation with an equals sign (this must be the last thing you draw)
+3. **Calculate** - Press Enter or click the Calculate button
+4. **Get Results** - The AI reads your handwriting, solves the equation, and displays the answer in orange
+
+<Tip>
+  The equals sign must be the last element you draw before calculating. This helps the application know exactly where to place the answer.
+</Tip>
+
+## Technology Stack
+
+AI Math Notes is built with:
+
+- **Python** - Core application logic
+- **Tkinter** - Graphical user interface framework
+- **PIL (Pillow)** - Image processing and canvas rendering
+- **OpenAI GPT-4o** - Multimodal LLM for handwriting recognition and calculation
+
+## What's Next?
+
+Ready to start calculating? Head over to the [Installation](/installation) guide to set up your environment, or jump straight to the [Quick Start](/quickstart) tutorial to see it in action.

@@ -1,0 +1,196 @@
+---
+title: 'Architecture'
+description: 'Learn about the DrawingApp class structure, canvas system, and PIL integration'
+---
+
+## Overview
+
+AI Math Notes is built around a single `DrawingApp` class that manages the Tkinter-based canvas interface, PIL image processing, and OpenAI API integration. The architecture follows a monolithic design pattern with event-driven user interactions.
+
+## DrawingApp Class
+
+The `DrawingApp` class (`main.py:8`) is the core component that handles all application functionality.
+
+### Initialization
+
+<ParamField path="root" type="tk.Tk">
+  The Tkinter root window instance
+</ParamField>
+
+```python
+class DrawingApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("AI Math Notes")
+
+        self.canvas_width = 1200
+        self.canvas_height = 800
+
+        self.canvas = tk.Canvas(root, bg='black', width=self.canvas_width, height=self.canvas_height)
+        self.canvas.pack()
+
+        self.image = Image.new("RGB", (self.canvas_width, self.canvas_height), (0, 0, 0))
+        self.draw = ImageDraw.Draw(self.image)
+
+        self.client = OpenAI()
+```
+
+The constructor initializes:
+- A 1200x800 black canvas for drawing
+- A PIL Image instance for image processing
+- An ImageDraw object for rendering
+- Event bindings for mouse and keyboard interactions
+- Action history for undo functionality
+- OpenAI client for API calls
+
+### Canvas System
+
+The application uses a dual-rendering approach:
+
+1. **Tkinter Canvas** (`main.py:16`) - Provides real-time visual feedback
+2. **PIL Image** (`main.py:19-20`) - Creates the actual image sent to the API
+
+This architecture ensures that user drawings are both displayed interactively and captured for image analysis.
+
+### Event Bindings
+
+The application binds several events (`main.py:22-26`):
+
+```python
+self.canvas.bind("<Button-1>", self.start_draw)
+self.canvas.bind("<B1-Motion>", self.paint)
+self.canvas.bind("<ButtonRelease-1>", self.reset)
+self.root.bind("<Command-z>", self.command_undo)
+self.root.bind("<Return>", self.command_calculate)
+```
+
+## Core Methods
+
+### Drawing Methods
+
+#### start_draw()
+
+<ParamField path="event" type="tk.Event">
+  Mouse click event containing x, y coordinates
+</ParamField>
+
+Initializes a new drawing action when the mouse button is pressed (`main.py:45-47`).
+
+```python
+def start_draw(self, event):
+    self.current_action = []
+    self.last_x, self.last_y = event.x, event.y
+```
+
+#### paint()
+
+<ParamField path="event" type="tk.Event">
+  Mouse motion event with current cursor position
+</ParamField>
+
+Draws lines on both the Tkinter canvas and PIL image as the mouse moves (`main.py:49-55`).
+
+```python
+def paint(self, event):
+    x, y = event.x, event.y
+    if self.last_x and self.last_y:
+        line_id = self.canvas.create_line((self.last_x, self.last_y, x, y), fill='white', width=5)
+        self.draw.line((self.last_x, self.last_y, x, y), fill='white', width=5)
+        self.current_action.append((line_id, (self.last_x, self.last_y, x, y)))
+    self.last_x, self.last_y = x, y
+```
+
+Each stroke is stored with its line ID and coordinates for undo functionality.
+
+#### reset()
+
+<ParamField path="event" type="tk.Event">
+  Mouse release event
+</ParamField>
+
+Completes the current drawing action and adds it to the action history (`main.py:57-60`).
+
+### Action Management
+
+#### undo()
+
+Reverts the last drawing action by removing lines from both canvas and image (`main.py:68-73`).
+
+```python
+def undo(self):
+    if self.actions:
+        last_action = self.actions.pop()
+        for line_id, coords in last_action:
+            self.canvas.delete(line_id)
+        self.redraw_all()
+```
+
+#### redraw_all()
+
+Recreates the entire canvas and PIL image from the action history (`main.py:78-85`).
+
+```python
+def redraw_all(self):
+    self.image = Image.new("RGB", (self.canvas_width, self.canvas_height), (0, 0, 0))
+    self.draw = ImageDraw.Draw(self.image)
+    self.canvas.delete("all")
+    for action in self.actions:
+        for _, coords in action:
+            self.draw.line(coords, fill='white', width=5)
+            self.canvas.create_line(coords, fill='white', width=5)
+```
+
+#### clear()
+
+Clears the entire canvas and resets all state (`main.py:62-66`).
+
+## PIL Integration
+
+The application uses Pillow (PIL) for image processing:
+
+- **Image Creation**: Creates a blank RGB image matching canvas dimensions
+- **Drawing**: Uses `ImageDraw` to render white lines (width=5) on black background
+- **Font Rendering**: Loads default font at size 100 for displaying answers
+- **Export**: Converts images to PNG format for base64 encoding
+
+### Image Flow
+
+1. User draws on Tkinter canvas
+2. Each stroke is simultaneously drawn on PIL Image
+3. Image is encoded to base64 PNG (`main.py:88-91`)
+4. Base64 string is sent to OpenAI API
+5. Answer is rendered back onto both canvas and image
+
+## Answer Display
+
+The `draw_answer()` method (`main.py:119-138`) positions the calculated result:
+
+```python
+def draw_answer(self, answer):
+    if not self.actions:
+        return
+    
+    last_action = self.actions[-1]
+    last_coords = last_action[-1][-1]
+
+    equals_x = last_coords[2]
+    equals_y = last_coords[3]
+
+    x_start = equals_x + 70
+    y_start = equals_y - 20
+
+    self.canvas.create_text(x_start, y_start, text=answer, font=self.custom_font, fill="#FF9500")
+
+    font = ImageFont.load_default(size=100)
+    self.draw.text((x_start, y_start - 50), answer, font=font, fill="#FF9500")
+```
+
+The answer appears 70 pixels to the right of the last drawn element in orange (#FF9500).
+
+## Dependencies
+
+From `requirements.txt`:
+
+- **pillow==10.2.0**: Image processing and rendering
+- **openai==1.14.2**: GPT-4o API client
+- **tkinter**: GUI framework (built into Python)

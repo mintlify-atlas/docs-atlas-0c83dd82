@@ -1,0 +1,157 @@
+---
+title: FAQ
+description: Frequently asked questions about AI Math Notes
+---
+
+## General Questions
+
+<AccordionGroup>
+  <Accordion title="What is AI Math Notes?">
+    AI Math Notes is an interactive drawing application that lets you draw mathematical equations on a canvas. When you draw an equation with an equals sign, the application uses OpenAI's multimodal LLM (GPT-4o) to calculate and display the result automatically.
+    
+    The application was inspired by Apple's "Math Notes" demo from WWDC 2024.
+  </Accordion>
+
+  <Accordion title="What can I use AI Math Notes for?">
+    You can use AI Math Notes to:
+    - Solve arithmetic equations (addition, subtraction, multiplication, division)
+    - Calculate complex mathematical expressions
+    - Get instant visual feedback on handwritten math problems
+    - Practice math in an interactive way
+    
+    The AI can understand handwritten mathematical notation and provide accurate answers.
+  </Accordion>
+
+  <Accordion title="Do I need an internet connection?">
+    Yes, AI Math Notes requires an active internet connection to communicate with OpenAI's API for equation processing and calculation.
+  </Accordion>
+
+  <Accordion title="Is AI Math Notes free to use?">
+    The application itself is open source and free under the MIT License. However, you need your own OpenAI API key, which requires an OpenAI account. OpenAI charges based on API usage according to their pricing model.
+    
+    The application uses the GPT-4o model, so costs will apply based on OpenAI's current pricing for that model.
+  </Accordion>
+</AccordionGroup>
+
+## Setup and Installation
+
+<AccordionGroup>
+  <Accordion title="What are the system requirements?">
+    - Python 3.7 or higher
+    - Tkinter (usually included with Python, may need separate installation on Linux)
+    - Internet connection
+    - OpenAI API key
+    - Approximately 1200x800 pixels of screen space for the default canvas size
+  </Accordion>
+
+  <Accordion title="How do I get an OpenAI API key?">
+    1. Go to [OpenAI's website](https://platform.openai.com/)
+    2. Create an account or sign in
+    3. Navigate to API keys section
+    4. Create a new API key
+    5. Copy the key and set it as an environment variable named `OPENAI_API_KEY`
+    
+    Keep your API key secure and never share it publicly.
+  </Accordion>
+
+  <Accordion title="Which Python packages are required?">
+    AI Math Notes requires two main packages:
+    - `pillow==10.2.0` - For image processing and canvas manipulation
+    - `openai==1.14.2` - For OpenAI API integration
+    
+    Install them using: `pip install -r requirements.txt`
+  </Accordion>
+
+  <Accordion title="Can I use this on macOS, Windows, and Linux?">
+    Yes! AI Math Notes is built with Python and Tkinter, which are cross-platform. However:
+    - On Linux, you may need to install tkinter separately
+    - Font rendering may vary slightly between platforms
+    - Keyboard shortcuts (like Cmd+Z vs Ctrl+Z) are platform-specific
+  </Accordion>
+</AccordionGroup>
+
+## Usage Questions
+
+<AccordionGroup>
+  <Accordion title="How do I draw an equation?">
+    1. Click and drag your mouse on the black canvas to draw
+    2. Write your equation using white strokes (e.g., "5 + 3 =")
+    3. Make sure the equals sign is the LAST thing you draw
+    4. Press Enter or click the Calculate button
+    5. The answer will appear in orange next to the equals sign
+  </Accordion>
+
+  <Accordion title="Why must the equals sign be the last thing I draw?">
+    The application uses the position of your last drawing action to determine where to place the calculated answer. This is a current limitation of the app.
+    
+    A planned improvement is to use computer vision to automatically detect the equals sign position, regardless of drawing order.
+  </Accordion>
+
+  <Accordion title="What keyboard shortcuts are available?">
+    - **Cmd+Z (macOS)**: Undo the last drawing stroke
+    - **Enter/Return**: Calculate the equation
+    
+    You can also use the on-screen buttons for these actions.
+  </Accordion>
+
+  <Accordion title="How do I clear the canvas?">
+    Click the "Clear" button to erase everything on the canvas and start fresh.
+  </Accordion>
+
+  <Accordion title="Can I undo mistakes?">
+    Yes! Use the Undo button or press Cmd+Z (on macOS) to remove the last stroke you drew. You can undo multiple times to remove several strokes.
+  </Accordion>
+
+  <Accordion title="What color should I expect for the answer?">
+    Calculated answers appear in orange (#FF9500) to distinguish them from your white drawings on the black canvas.
+  </Accordion>
+</AccordionGroup>
+
+## Technical Questions
+
+<AccordionGroup>
+  <Accordion title="Which AI model does this use?">
+    AI Math Notes uses OpenAI's GPT-4o model, which is a multimodal model capable of understanding both text and images. The application sends an image of your drawing to the API for analysis.
+  </Accordion>
+
+  <Accordion title="How does the calculation work?">
+    When you click Calculate:
+    1. The canvas content is converted to a PNG image
+    2. The image is encoded to base64
+    3. It's sent to OpenAI's GPT-4o model with instructions to solve the equation
+    4. The AI analyzes the handwritten equation
+    5. The result is displayed on the canvas in orange text
+  </Accordion>
+
+  <Accordion title="Can I modify the canvas size?">
+    Yes! The default canvas is 1200x800 pixels. You can modify these dimensions by editing the `canvas_width` and `canvas_height` variables in `main.py` (lines 13-14).
+  </Accordion>
+
+  <Accordion title="Why does the app use 'Noteworthy' font?">
+    The Noteworthy font gives the answers a handwritten appearance that matches the aesthetic of the drawn equations. If this font isn't available on your system, the application will fall back to the default system font.
+  </Accordion>
+
+  <Accordion title="Is my data sent to OpenAI?">
+    Yes, when you click Calculate, an image of your canvas is sent to OpenAI's API for processing. Review OpenAI's privacy policy and data usage terms if you have concerns about what data is being sent.
+  </Accordion>
+</AccordionGroup>
+
+## Contributing
+
+<AccordionGroup>
+  <Accordion title="Can I contribute to AI Math Notes?">
+    Yes! AI Math Notes is an open-source project. Contributions are welcome. You can:
+    - Report bugs
+    - Suggest new features
+    - Submit pull requests
+    - Improve documentation
+    
+    Visit the GitHub repository to get started.
+  </Accordion>
+
+  <Accordion title="What are the planned improvements?">
+    The main planned improvement is to implement automatic equals sign detection using computer vision. This would allow users to draw the equals sign at any point, not just as the last stroke.
+    
+    Other improvements and features are welcome as contributions from the community.
+  </Accordion>
+</AccordionGroup>

@@ -1,0 +1,140 @@
+---
+title: Troubleshooting
+description: Common issues and solutions for AI Math Notes
+---
+
+## Common Issues
+
+### OpenAI API Key Issues
+
+<Warning>
+The application requires a valid OpenAI API key to function. Without it, the Calculate feature will not work.
+</Warning>
+
+**Problem**: Error when clicking Calculate button or application fails to start
+
+**Solution**: Set up your OpenAI API key as an environment variable:
+
+```bash
+# macOS/Linux
+export OPENAI_API_KEY='your-api-key-here'
+
+# Windows (Command Prompt)
+set OPENAI_API_KEY=your-api-key-here
+
+# Windows (PowerShell)
+$env:OPENAI_API_KEY='your-api-key-here'
+```
+
+To make this permanent, add it to your shell configuration file (`~/.bashrc`, `~/.zshrc`, etc.).
+
+### Dependency Installation Errors
+
+**Problem**: `ModuleNotFoundError` or import errors when running `python main.py`
+
+**Solution**: Ensure all dependencies are installed:
+
+```bash
+pip install -r requirements.txt
+```
+
+Required packages:
+- `pillow==10.2.0` - For image processing
+- `openai==1.14.2` - For OpenAI API integration
+
+<Note>
+If you're using a virtual environment, make sure it's activated before installing dependencies.
+</Note>
+
+### Drawing Not Appearing on Canvas
+
+**Problem**: Canvas appears but drawing doesn't show up
+
+**Possible causes and solutions**:
+
+1. **Mouse binding issue**: Ensure you're clicking and dragging (not just clicking) on the canvas
+2. **Display settings**: The canvas background is black and drawing color is white - check your display contrast settings
+3. **Tkinter installation**: On some Linux systems, tkinter may not be installed by default
+
+```bash
+# Ubuntu/Debian
+sudo apt-get install python3-tk
+
+# Fedora
+sudo dnf install python3-tkinter
+
+# macOS (usually pre-installed)
+brew install python-tk
+```
+
+### Calculate Button Not Working
+
+**Problem**: Clicking Calculate doesn't show any result
+
+**Common reasons**:
+
+1. **Missing equals sign**: The equals sign must be the last thing drawn before calculating
+2. **Nothing drawn**: Ensure you've drawn an equation on the canvas
+3. **API quota exceeded**: Check your OpenAI API usage and billing status
+4. **Network connectivity**: The app requires internet connection to communicate with OpenAI API
+
+<Warning>
+The equals sign MUST be the last stroke drawn. If you draw anything after the equals sign, the calculation may not work correctly.
+</Warning>
+
+### Undo Function Issues
+
+**Problem**: Undo (Cmd/Ctrl+Z) doesn't work
+
+**Solutions**:
+
+1. **Keyboard shortcut**: Try using the Undo button instead of the keyboard shortcut
+2. **Platform-specific binding**: On macOS, use `Cmd+Z`. On Windows/Linux, the binding may need to be updated in the code
+3. **No actions to undo**: Undo only works if you've drawn something on the canvas
+
+### Font Display Issues
+
+**Problem**: Answer appears but uses wrong font or looks distorted
+
+**Cause**: The application uses "Noteworthy" font which may not be available on all systems
+
+**Solution**: The application will fall back to default fonts if Noteworthy isn't available. This is normal and doesn't affect functionality.
+
+### Application Window Issues
+
+**Problem**: Window is too large or doesn't fit on screen
+
+**Solution**: The default canvas size is 1200x800 pixels. If this doesn't fit your screen, you can modify the dimensions in `main.py:13-14`.
+
+### API Rate Limiting
+
+**Problem**: Getting rate limit errors from OpenAI
+
+**Solution**:
+
+1. Wait a few moments between calculations
+2. Check your OpenAI account tier and rate limits
+3. Upgrade your OpenAI plan if you need higher rate limits
+
+<Note>
+The application uses the `gpt-4o` model which requires appropriate API access. Ensure your API key has access to this model.
+</Note>
+
+### Python Version Compatibility
+
+**Problem**: Application fails to start or import errors
+
+**Solution**: Ensure you're using Python 3.7 or higher. The application uses modern Python features and recent library versions.
+
+```bash
+python --version
+```
+
+## Getting Help
+
+If you encounter issues not covered here:
+
+1. Check the [GitHub repository](https://github.com/ayushpai/AI-Math-Notes) for known issues
+2. Review your error messages carefully - they often indicate the exact problem
+3. Verify all environment variables are set correctly
+4. Ensure you have a stable internet connection

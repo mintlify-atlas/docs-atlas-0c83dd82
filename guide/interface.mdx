@@ -1,0 +1,100 @@
+---
+title: 'User Interface'
+description: 'Learn about the canvas, buttons, and UI elements in AI Math Notes'
+---
+
+The AI Math Notes interface is designed to be simple and intuitive, allowing you to focus on drawing and solving mathematical equations.
+
+## Canvas
+
+The main drawing area is a 1200x800 pixel canvas where you can draw mathematical equations with your mouse.
+
+<Note>
+The canvas has a **black background** with **white drawing color** for optimal contrast and readability.
+</Note>
+
+### Drawing Mechanics
+
+You can draw equations by clicking and dragging on the canvas:
+
+- **Click and hold** the left mouse button to start drawing
+- **Drag** to create lines with a 5-pixel width
+- **Release** to finish the current stroke
+
+<Tip>
+Each stroke you draw is tracked as a separate action, which enables the undo functionality.
+</Tip>
+
+## Control Buttons
+
+The interface includes three essential buttons located at the bottom of the window:
+
+<Tabs>
+  <Tab title="Clear">
+    The **Clear** button removes all content from the canvas and resets the drawing area.
+
+    ```python
+    def clear(self):
+        self.canvas.delete("all")
+        self.image = Image.new("RGB", (self.canvas_width, self.canvas_height), (0, 0, 0))
+    ```
+
+    Use this when you want to start fresh with a new equation.
+  </Tab>
+
+  <Tab title="Undo">
+    The **Undo (Cmd/Ctrl Z)** button removes the last drawing stroke you made.
+
+    ```python
+    def undo(self):
+        if self.actions:
+            last_action = self.actions.pop()
+            for line_id, coords in last_action:
+                self.canvas.delete(line_id)
+            self.redraw_all()
+    ```
+
+    <Info>
+    The undo function works on a per-stroke basis. Each time you lift your mouse, that stroke becomes one undoable action.
+    </Info>
+  </Tab>
+
+  <Tab title="Calculate">
+    The **Calculate (Return/Enter)** button sends your drawing to the AI model for processing.
+
+    When you click Calculate:
+    1. The canvas is converted to a PNG image
+    2. The image is encoded in base64 format
+    3. It's sent to GPT-4o with instructions to solve the equation
+    4. The answer appears in **orange color** (#FF9500) next to the equals sign
+
+    ```python
+    response = self.client.chat.completions.create(
+        model="gpt-4o",
+        messages=[{
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "Give the answer to this math equation..."},
+                {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{base64_image}"}}
+            ]
+        }]
+    )
+    ```
+  </Tab>
+</Tabs>
+
+## Answer Display
+
+When the AI calculates your equation, the answer is displayed:
+
+- **Position**: 70 pixels to the right and 20 pixels above the last point you drew
+- **Color**: Orange (#FF9500) for clear visibility against the black background
+- **Font**: Noteworthy at 100pt size for a handwritten aesthetic
+
+<Note>
+The application assumes the last thing you drew is the equals sign, so make sure to draw the `=` symbol last before clicking Calculate.
+</Note>
+
+## Window Title
+
+The application window displays **"AI Math Notes"** as its title, making it easy to identify in your taskbar or when switching between applications.
